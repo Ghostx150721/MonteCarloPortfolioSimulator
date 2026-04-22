@@ -1,10 +1,19 @@
 ﻿using MonteCarlo.Core.Models;
+using MonteCarlo.Core.Data;
 
 namespace MonteCarlo.Core.Services
 {
     public class MonteCarloSimulator
     {
         private readonly Random _random = new();
+        private readonly List<double> _historicalReturns;
+
+        public MonteCarloSimulator()
+        {
+            var dataService = new MarketDataService();
+
+            _historicalReturns = dataService.LoadMonthlyReturns(Path.Combine(AppContext.BaseDirectory, "Data", "sp500.csv"));
+        }
 
         public SimulationResult Run(SimulationParameters parameters)
         {
@@ -48,10 +57,10 @@ namespace MonteCarlo.Core.Services
 
                 double monthlyCrashProbability = parameters.CrashProbabilityPerYear / 12;
 
-                if (_random.NextDouble() < monthlyCrashProbability)
-                {
-                    monthlyReturns += parameters.CrashImpact;
-                }
+                //if (_random.NextDouble() < monthlyCrashProbability)
+                //{
+                //    monthlyReturns += parameters.CrashImpact;
+                //}
 
                 portfolio *= Math.Exp(monthlyReturns);
 
@@ -63,25 +72,8 @@ namespace MonteCarlo.Core.Services
 
         private double GenerateMonthlyReturn(SimulationParameters parameters)
         {
-            // Convert annual return to monthly
-            double meanMonthly = parameters.MeanAnnualReturn / 12;
-            double volatilityMonthly = parameters.Volatility / Math.Sqrt(12);
-
-            // Box-Muller transform for normal distribution
-            double u1 = 1.0 - _random.NextDouble(); // Uniform(0,1] random doubles
-            double u2 = 1.0 - _random.NextDouble();
-
-            double randStdNormal =
-                Math.Sqrt(-2.0 * Math.Log(u1)) *
-                Math.Cos(2.0 * Math.PI * u2);
-
-            double randomReturn = meanMonthly + volatilityMonthly * randStdNormal;
-
-            // GBM formula
-            double drift = meanMonthly - 0.5 * volatilityMonthly * volatilityMonthly;
-            double shock = volatilityMonthly * randStdNormal;
-
-            return drift + shock;
+            int index = _random.Next(_historicalReturns.Count);
+            return _historicalReturns[index];
         }
     }
 }
