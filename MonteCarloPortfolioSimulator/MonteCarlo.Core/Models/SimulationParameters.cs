@@ -8,5 +8,7 @@
         public double Volatility { get; set; } // e.g. 0.15
         public int Years { get; set; }
         public int SimulationCount { get; set; }
+        public double CrashProbabilityPerYear { get; set; } // e.g. 0.02 (2%)
+        public double CrashImpact { get; set; } // e.g. -0.4 (-40%)
     }
 }

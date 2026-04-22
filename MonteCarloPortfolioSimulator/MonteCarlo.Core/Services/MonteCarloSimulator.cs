@@ -46,6 +46,13 @@ namespace MonteCarlo.Core.Services
             {
                 double monthlyReturns = GenerateMonthlyReturn(parameters);
 
+                double monthlyCrashProbability = parameters.CrashProbabilityPerYear / 12;
+
+                if (_random.NextDouble() < monthlyCrashProbability)
+                {
+                    monthlyReturns += parameters.CrashImpact;
+                }
+
                 portfolio *= Math.Exp(monthlyReturns);
 
                 portfolio += parameters.MonthlyContribution;
