@@ -35,7 +35,7 @@ namespace MonteCarlo.Core.Services
             {
                 double monthlyReturns = GenerateMonthlyReturn(parameters);
 
-                portfolio *= (1 + monthlyReturns);
+                portfolio *= Math.Exp(monthlyReturns);
 
                 portfolio += parameters.MonthlyContribution;
             }
@@ -55,11 +55,15 @@ namespace MonteCarlo.Core.Services
 
             double randStdNormal =
                 Math.Sqrt(-2.0 * Math.Log(u1)) *
-                Math.Sqrt(2.0 * Math.PI * u2);
+                Math.Cos(2.0 * Math.PI * u2);
 
             double randomReturn = meanMonthly + volatilityMonthly * randStdNormal;
 
-            return randomReturn;
+            // GBM formula
+            double drift = meanMonthly - 0.5 * volatilityMonthly * volatilityMonthly;
+            double shock = volatilityMonthly * randStdNormal;
+
+            return drift + shock;
         }
     }
 }
