@@ -1,3 +1,34 @@
-﻿<form method="post" asp-action="Run">
+﻿@model MonteCarlo.Web.Models.SimulationInputModel
+
+<h2>Monte Carlo Simulator</h2>
+
+<form method="post" asp-action="Run">
+
+    <label>Initial Investment:</label>
+    <input asp-for="InitialInvestment" /><br />
+
+    <label>Monthly Contribution:</label>
+    <input asp-for="MonthlyContribution" /><br />
+
+    <label>Years:</label>
+    <input asp-for="Years" /><br />
+
+    <label>Expected Return (0.08 = 8%):</label>
+    <input asp-for="MeanAnnualReturn" /><br />
+
+    <label>Volatility (0.15 = 15%):</label>
+    <input asp-for="Volatility" /><br />
+
+    <label>Simulation Count:</label>
+    <input asp-for="SimulationCount" /><br />
+
+    <label>Crash Probability (yearly):</label>
+    <input asp-for="CrashProbabilityPerYear" /><br />
+
+    <label>Crash Impact (-0.4 = -40%):</label>
+    <input asp-for="CrashImpact" /><br />
+
+    <br />
     <button type="submit">Run Simulation</button>
+
 </form>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MonteCarlo.Core.Models;
+using MonteCarlo.Web.Models;
 using MonteCarlo.Web.Services;
 
 namespace MonteCarlo.Web.Controllers
@@ -15,22 +16,22 @@ namespace MonteCarlo.Web.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return View(new SimulationInputModel());
         }
 
         [HttpPost]
-        public async Task<IActionResult> Run()
+        public async Task<IActionResult> Run(SimulationInputModel input)
         {
             var parameters = new SimulationParameters
             {
-                InitialInvestment = 10000,
-                MonthlyContribution = 500,
-                MeanAnnualReturn = 0.08,
-                Volatility = 0.15,
-                Years = 25,
-                SimulationCount = 1000,
-                CrashProbabilityPerYear = 0.02,
-                CrashImpact = -0.4
+                InitialInvestment = input.InitialInvestment,
+                MonthlyContribution = input.MonthlyContribution,
+                MeanAnnualReturn = input.MeanAnnualReturn,
+                Volatility = input.Volatility,
+                Years = input.Years,
+                SimulationCount = input.SimulationCount,
+                CrashProbabilityPerYear = input.CrashProbabilityPerYear,
+                CrashImpact = input.CrashImpact
             };
 
             var result = await _service.RunSimulation(parameters);
