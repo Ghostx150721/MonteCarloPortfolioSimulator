@@ -4,10 +4,12 @@
 
 <h2>Results</h2>
 
-<p>Average: @Model.Average</p>
-<p>P10: @Model.P10</p>
-<p>P50: @Model.P50</p>
-<p>P90: @Model.P90</p>
+<div style="border:1px solid #ccc; padding:10px; margin-bottom:20px;">
+    <h3>Investment Summary</h3>
+    <p><strong>Worst Case (10%):</strong> @Model.P10.ToString("N0")</p>
+    <p><strong>Most Likely (Median):</strong> @Model.P50.ToString("N0")</p>
+    <p><strong>Best Case (90%):</strong> @Model.P90.ToString("N0")</p>
+</div>
 
 <canvas id="chart"></canvas>
 
@@ -16,8 +18,14 @@
 <script>
     const rawData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FinalPortfolioValues));
 
-    // --- Create bins ---
+    const percentileValues = [
+        @Model.P10,
+        @Model.P50,
+        @Model.P90
+    ];
+
     const binCount = 30;
+
     const min = Math.min(...rawData);
     const max = Math.max(...rawData);
     const binSize = (max - min) / binCount;
@@ -34,6 +42,13 @@
         const start = Math.round(min + i * binSize);
         const end = Math.round(start + binSize);
         return `${start} - ${end}`;
+    });
+
+    // ✅ Convert percentile values → bin index
+    const percentileIndexes = percentileValues.map(v => {
+        let index = Math.floor((v - min) / binSize);
+        if (index >= binCount) index = binCount - 1;
+        return index;
     });
 
     const ctx = document.getElementById('chart');
@@ -56,6 +71,36 @@
                     }
                 }
             }
-        }
+        },
+
+        // ✅ REGISTER PLUGIN HERE
+        plugins: [{
+            id: 'percentileLines',
+            afterDraw: (chart) => {
+                const { ctx, scales: { x, y } } = chart;
+
+                percentileIndexes.forEach((index, i) => {
+                    const xPos = x.getPixelForValue(index);
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(xPos, y.top);
+                    ctx.lineTo(xPos, y.bottom);
+                    ctx.lineWidth = 2;
+
+                    // Different colors for each percentile
+                    const colors = ['red', 'green', 'orange'];
+                    ctx.strokeStyle = colors[i];
+
+                    ctx.stroke();
+
+                    // Optional label
+                    ctx.fillStyle = colors[i];
+                    ctx.fillText(['P10', 'P50', 'P90'][i], xPos + 5, y.top + 15);
+
+                    ctx.restore();
+                });
+            }
+        }]
     });
 </script>
