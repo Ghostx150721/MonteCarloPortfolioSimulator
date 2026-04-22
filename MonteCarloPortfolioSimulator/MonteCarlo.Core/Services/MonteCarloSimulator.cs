@@ -16,12 +16,23 @@ namespace MonteCarlo.Core.Services
                 results.Add(finalValue);
             }
 
+            var sorted = results.OrderBy(x => x).ToList();
+
+            int count = sorted.Count;
+
+            double p10 = sorted[(int)(0.10 * count)];
+            double p50 = sorted[(int)(0.50 * count)];
+            double p90 = sorted[(int)(0.90 * count)];
+
             return new SimulationResult
             {
                 FinalPortfolioValues = results,
                 Average = results.Average(),
                 Min = results.Min(),
-                Max = results.Max()
+                Max = results.Max(),
+                P10 = p10,
+                P50 = p50,
+                P90 = p90
             };
         }
 
