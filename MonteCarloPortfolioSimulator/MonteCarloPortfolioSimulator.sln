@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonteCarlo.Api", "MonteCarl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonteCarlo.Core", "MonteCarlo.Core\MonteCarlo.Core.csproj", "{9E5E11DB-63D8-4ED7-BF17-EF4ABAD9E803}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonteCarlo.Web", "MonteCarlo.Web\MonteCarlo.Web.csproj", "{B10D8090-DC30-4333-950F-B22532B0B3D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9E5E11DB-63D8-4ED7-BF17-EF4ABAD9E803}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E5E11DB-63D8-4ED7-BF17-EF4ABAD9E803}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E5E11DB-63D8-4ED7-BF17-EF4ABAD9E803}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B10D8090-DC30-4333-950F-B22532B0B3D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B10D8090-DC30-4333-950F-B22532B0B3D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B10D8090-DC30-4333-950F-B22532B0B3D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B10D8090-DC30-4333-950F-B22532B0B3D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

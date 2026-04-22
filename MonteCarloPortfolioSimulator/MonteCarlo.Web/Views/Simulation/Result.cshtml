@@ -1,0 +1,61 @@
+﻿@model MonteCarlo.Core.Models.SimulationResult
+@using System.Text.Json
+@inject Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper Html
+
+<h2>Results</h2>
+
+<p>Average: @Model.Average</p>
+<p>P10: @Model.P10</p>
+<p>P50: @Model.P50</p>
+<p>P90: @Model.P90</p>
+
+<canvas id="chart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const rawData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FinalPortfolioValues));
+
+    // --- Create bins ---
+    const binCount = 30;
+    const min = Math.min(...rawData);
+    const max = Math.max(...rawData);
+    const binSize = (max - min) / binCount;
+
+    const bins = new Array(binCount).fill(0);
+
+    rawData.forEach(value => {
+        let index = Math.floor((value - min) / binSize);
+        if (index >= binCount) index = binCount - 1;
+        bins[index]++;
+    });
+
+    const labels = bins.map((_, i) => {
+        const start = Math.round(min + i * binSize);
+        const end = Math.round(start + binSize);
+        return `${start} - ${end}`;
+    });
+
+    const ctx = document.getElementById('chart');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Distribution',
+                data: bins
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    ticks: {
+                        maxRotation: 90,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+</script>
