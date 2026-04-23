@@ -10,5 +10,6 @@
         public int SimulationCount { get; set; }
         public double CrashProbabilityPerYear { get; set; } // e.g. 0.02 (2%)
         public double CrashImpact { get; set; } // e.g. -0.4 (-40%)
+        public string ModelType { get; set; } = "Real";
     }
 }

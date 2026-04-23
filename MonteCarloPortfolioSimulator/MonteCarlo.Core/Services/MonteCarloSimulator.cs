@@ -51,19 +51,34 @@ namespace MonteCarlo.Core.Services
 
             int totalMonths = parameters.Years * 12;
 
+            bool inCrash = false; // <-- ADD THIS
+
             for (int month = 0; month < totalMonths; month++)
             {
-                double monthlyReturns = GenerateMonthlyReturn(parameters);
+                // Chance to ENTER crash
+                if (!inCrash && _random.NextDouble() < 0.02) // ~2% per month
+                {
+                    inCrash = true;
+                }
 
-                double monthlyCrashProbability = parameters.CrashProbabilityPerYear / 12;
+                double monthlyReturn;
 
-                //if (_random.NextDouble() < monthlyCrashProbability)
-                //{
-                //    monthlyReturns += parameters.CrashImpact;
-                //}
+                if (inCrash)
+                {
+                    // Crash regime (bad returns)
+                    monthlyReturn = -0.05 + (_random.NextDouble() * 0.02);
 
-                portfolio *= Math.Exp(monthlyReturns);
+                    // Chance to EXIT crash
+                    if (_random.NextDouble() < 0.2)
+                        inCrash = false;
+                }
+                else
+                {
+                    // Normal regime (your existing model)
+                    monthlyReturn = GenerateMonthlyReturn(parameters);
+                }
 
+                portfolio *= Math.Exp(monthlyReturn);
                 portfolio += parameters.MonthlyContribution;
             }
 
@@ -72,8 +87,30 @@ namespace MonteCarlo.Core.Services
 
         private double GenerateMonthlyReturn(SimulationParameters parameters)
         {
-            int index = _random.Next(_historicalReturns.Count);
-            return _historicalReturns[index];
+            if (parameters.ModelType == "GBM")
+            {
+                double meanMonthly = parameters.MeanAnnualReturn / 12;
+                double volatilityMonthly = parameters.Volatility / Math.Sqrt(12);
+
+                double u1 = 1.0 - _random.NextDouble();
+                double u2 = 1.0 - _random.NextDouble();
+
+                double randStdNormal =
+                    Math.Sqrt(-2.0 * Math.Log(u1)) *
+                    Math.Cos(2.0 * Math.PI * u2);
+
+                double drift = meanMonthly - 0.5 * volatilityMonthly * volatilityMonthly;
+                double shock = volatilityMonthly * randStdNormal;
+
+                return drift + shock;
+            }
+            else // Real data
+            {
+                int index = _random.Next(_historicalReturns.Count);
+                return _historicalReturns[index];
+            }
         }
+
+
     }
 }
