@@ -1,0 +1,26 @@
+﻿@model MonteCarlo.Web.Models.ComparisonResult
+
+<h2>Strategy Comparison</h2>
+
+<table border="1" cellpadding="10">
+    <tr>
+        <th>Metric</th>
+        <th>Strategy A</th>
+        <th>Strategy B</th>
+    </tr>
+    <tr>
+        <td>P10</td>
+        <td>@Model.StrategyA.P10.ToString("N0")</td>
+        <td>@Model.StrategyB.P10.ToString("N0")</td>
+    </tr>
+    <tr>
+        <td>P50</td>
+        <td>@Model.StrategyA.P50.ToString("N0")</td>
+        <td>@Model.StrategyB.P50.ToString("N0")</td>
+    </tr>
+    <tr>
+        <td>P90</td>
+        <td>@Model.StrategyA.P90.ToString("N0")</td>
+        <td>@Model.StrategyB.P90.ToString("N0")</td>
+    </tr>
+</table>

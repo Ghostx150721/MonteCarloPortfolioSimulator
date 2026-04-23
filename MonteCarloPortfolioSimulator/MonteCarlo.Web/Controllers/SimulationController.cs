@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MonteCarlo.Core.Models;
+using MonteCarlo.Core.Services;
 using MonteCarlo.Web.Models;
 using MonteCarlo.Web.Services;
 
@@ -37,6 +38,44 @@ namespace MonteCarlo.Web.Controllers
             var result = await _service.RunSimulation(parameters);
 
             return View("Result", result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Compare(SimulationInputModel input)
+        {
+            var simulator = new MonteCarloSimulator();
+
+            // Strategy A
+            var paramsA = new SimulationParameters
+            {
+                InitialInvestment = input.InitialInvestment,
+                MonthlyContribution = input.MonthlyContribution,
+                Years = input.Years,
+                MeanAnnualReturn = input.MeanAnnualReturn,
+                Volatility = input.Volatility,
+                SimulationCount = input.SimulationCount,
+                ModelType = input.ModelType
+            };
+
+            // Strategy B (example: double contribution for half time)
+            var paramsB = new SimulationParameters
+            {
+                InitialInvestment = input.InitialInvestment,
+                MonthlyContribution = input.MonthlyContribution * 2,
+                Years = input.Years / 2,
+                MeanAnnualReturn = input.MeanAnnualReturn,
+                Volatility = input.Volatility,
+                SimulationCount = input.SimulationCount,
+                ModelType = input.ModelType
+            };
+
+            var result = new ComparisonResult
+            {
+                StrategyA = simulator.Run(paramsA),
+                StrategyB = simulator.Run(paramsB)
+            };
+
+            return View("CompareResult", result);
         }
     }
 }
