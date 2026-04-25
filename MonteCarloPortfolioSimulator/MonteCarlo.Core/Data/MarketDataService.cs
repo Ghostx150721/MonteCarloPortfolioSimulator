@@ -13,7 +13,7 @@ namespace MonteCarlo.Core.Data
         {
             var lines = File.ReadAllLines(filePath).Skip(1);
 
-            var prices = new List<double>();
+            var data = new List<(DateTime date, double price)>();
 
             foreach (var line in lines)
             {
@@ -22,17 +22,21 @@ namespace MonteCarlo.Core.Data
                 if (parts.Length < 2)
                     continue;
 
-                if (double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double price))
+                if (DateTime.TryParse(parts[0], out var date) &&
+                    double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double price) &&
+                    price > 0)
                 {
-                    prices.Add(price);
+                    data.Add((date, price));
                 }
             }
 
+            var ordered = data.OrderBy(x => x.date).ToList();
+
             var returns = new List<double>();
 
-            for (int i = 1; i < prices.Count; i++)
+            for (int i = 1; i < ordered.Count; i++)
             {
-                double r = Math.Log(prices[i] / prices[i - 1]); // log return
+                double r = Math.Log(ordered[i].price / ordered[i - 1].price);
                 returns.Add(r);
             }
 

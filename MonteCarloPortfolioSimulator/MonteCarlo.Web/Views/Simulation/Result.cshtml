@@ -104,3 +104,50 @@
         }]
     });
 </script>
+
+<h3>Sample Simulation Paths</h3>
+<canvas id="pathChart"></canvas>
+
+<script>
+    const paths = @Html.Raw(JsonSerializer.Serialize(Model.Paths));
+
+    // take first 20 paths
+    const samplePaths = paths.slice(0, 20);
+
+    const datasets = samplePaths.map((path, i) => ({
+        label: `Sim ${i + 1}`,
+        data: path,
+        borderWidth: 1,
+        fill: false,
+        tension: 0.1
+    }));
+
+    new Chart(document.getElementById('pathChart'), {
+        type: 'line',
+        data: {
+            labels: [...Array(samplePaths[0].length).keys()],
+            datasets: datasets
+        },
+        options: {
+            plugins: {
+                legend: {
+                    display: false // cleaner look
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Months'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Portfolio Value'
+                    }
+                }
+            }
+        }
+    });
+</script>

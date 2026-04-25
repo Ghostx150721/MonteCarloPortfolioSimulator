@@ -41,7 +41,7 @@ namespace MonteCarlo.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Compare(SimulationInputModel input)
+        public IActionResult Compare(SimulationInputModel input)
         {
             var simulator = new MonteCarloSimulator();
 
@@ -54,10 +54,14 @@ namespace MonteCarlo.Web.Controllers
                 MeanAnnualReturn = input.MeanAnnualReturn,
                 Volatility = input.Volatility,
                 SimulationCount = input.SimulationCount,
-                ModelType = input.ModelType
+                ModelType = input.ModelType,
+
+                // ✅ ADD THESE
+                CrashProbabilityPerYear = input.CrashProbabilityPerYear,
+                CrashImpact = input.CrashImpact
             };
 
-            // Strategy B (example: double contribution for half time)
+            // Strategy B
             var paramsB = new SimulationParameters
             {
                 InitialInvestment = input.InitialInvestment,
@@ -66,7 +70,11 @@ namespace MonteCarlo.Web.Controllers
                 MeanAnnualReturn = input.MeanAnnualReturn,
                 Volatility = input.Volatility,
                 SimulationCount = input.SimulationCount,
-                ModelType = input.ModelType
+                ModelType = input.ModelType,
+
+                // ✅ ADD THESE
+                CrashProbabilityPerYear = input.CrashProbabilityPerYear,
+                CrashImpact = input.CrashImpact
             };
 
             var result = new ComparisonResult
