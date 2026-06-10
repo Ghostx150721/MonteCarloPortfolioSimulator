@@ -4,8 +4,9 @@
     {
         public List<double> FinalPortfolioValues { get; set; } = new();
 
-        // NEW: full simulation paths
         public List<List<double>> Paths { get; set; } = new();
+
+        public List<double> MaxDrawdowns { get; set; } = new();
 
         // Summary stats
         public double Average { get; set; }

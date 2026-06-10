@@ -1,85 +1,154 @@
 ﻿@model MonteCarlo.Web.Models.SimulationInputModel
+@{
+    ViewData["Title"] = "Simulator";
+}
 
-<h2>Monte Carlo Simulator</h2>
+<div class="max-w-lg mx-auto px-6 py-12">
 
-<button type="button" onclick="setConservative()">Conservative</button>
-<button type="button" onclick="setAggressive()">Aggressive</button>
+    <div class="mb-8">
+        <h1 class="text-xl font-medium text-gray-900">Portfolio simulator</h1>
+        <p class="text-sm text-gray-400 mt-1">
+            Monte Carlo projection using GBM or real S&amp;P 500 returns
+        </p>
+    </div>
 
-<script>
-    function setConservative() {
-        const returnSlider = document.querySelector('[name="MeanAnnualReturn"]');
-        const volSlider = document.querySelector('[name="Volatility"]');
+    <div class="flex gap-2 mb-6">
+        <button type="button" onclick="setPreset('conservative')"
+                class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+            Conservative
+        </button>
+        <button type="button" onclick="setPreset('aggressive')"
+                class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+            Aggressive
+        </button>
+        <button type="button" onclick="setPreset('moderate')"
+                class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+            Moderate
+        </button>
+    </div>
 
-        returnSlider.value = 0.06;
-        volSlider.value = 0.1;
+    <form method="post" asp-action="Run" onsubmit="showLoading()" class="flex flex-col gap-5">
 
-        returnSlider.dispatchEvent(new Event('input'));
-        volSlider.dispatchEvent(new Event('input'));
-    }
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-gray-500 uppercase tracking-widest">Initial investment</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                    <input asp-for="InitialInvestment" type="number"
+                           class="mono w-full h-10 pl-7 pr-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+                </div>
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-gray-500 uppercase tracking-widest">Monthly contribution</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                    <input asp-for="MonthlyContribution" type="number"
+                           class="mono w-full h-10 pl-7 pr-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+                </div>
+            </div>
+        </div>
 
-    function setAggressive() {
-        const returnSlider = document.querySelector('[name="MeanAnnualReturn"]');
-        const volSlider = document.querySelector('[name="Volatility"]');
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-gray-500 uppercase tracking-widest">Years</label>
+                <input asp-for="Years" type="number"
+                       class="mono w-full h-10 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-gray-500 uppercase tracking-widest">Simulations</label>
+                <input asp-for="SimulationCount" type="number"
+                       class="mono w-full h-10 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+            </div>
+        </div>
 
-        returnSlider.value = 0.10;
-        volSlider.value = 0.2;
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-gray-500 uppercase tracking-widest">Mean annual return</label>
+                <div class="relative">
+                    <input asp-for="MeanAnnualReturn" type="number" step="0.01"
+                           class="mono w-full h-10 px-3 pr-7 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                </div>
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-gray-500 uppercase tracking-widest">Volatility</label>
+                <div class="relative">
+                    <input asp-for="Volatility" type="number" step="0.01"
+                           class="mono w-full h-10 px-3 pr-7 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                </div>
+            </div>
+        </div>
 
-        returnSlider.dispatchEvent(new Event('input'));
-        volSlider.dispatchEvent(new Event('input'));
-    }
-</script>
+        <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+                <label class="text-xs text-gray-500 uppercase tracking-widest">Crash probability / year</label>
+                <span class="mono text-sm text-gray-700" id="crashProbOut">@Model.CrashProbabilityPerYear</span>
+            </div>
+            <input asp-for="CrashProbabilityPerYear" type="range" min="0" max="0.5" step="0.01"
+                   class="w-full"
+                   oninput="document.getElementById('crashProbOut').textContent = parseFloat(this.value).toFixed(2)" />
+            <div class="flex justify-between text-xs text-gray-300">
+                <span>0%</span><span>50%</span>
+            </div>
+        </div>
 
-<form method="post" asp-action="Run">
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs text-gray-500 uppercase tracking-widest">Crash impact</label>
+            <div class="relative">
+                <input asp-for="CrashImpact" type="number" step="0.01"
+                       class="mono w-full h-10 px-3 pr-7 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+            </div>
+            <p class="text-xs text-gray-400">Enter a negative value, e.g. -0.40 for a 40% crash</p>
+        </div>
 
-    <label>Initial Investment:</label>
-    <input asp-for="InitialInvestment" /><br />
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs text-gray-500 uppercase tracking-widest">Model</label>
+            <select asp-for="ModelType"
+                    class="mono w-full h-10 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400 appearance-none">
+                <option value="Real">Real market (S&amp;P 500 historical)</option>
+                <option value="GBM">Theoretical (GBM / normal distribution)</option>
+            </select>
+        </div>
 
-    <label>Monthly Contribution:</label>
-    <input asp-for="MonthlyContribution" /><br />
+        <div class="flex gap-3 pt-2">
+            <button type="submit"
+                    class="flex-1 h-11 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors">
+                Run simulation
+            </button>
+            <button type="submit" formaction="/Simulation/Compare"
+                    class="flex-1 h-11 rounded-lg border border-gray-200 bg-white text-sm text-gray-600 font-medium hover:bg-gray-50 transition-colors">
+                Compare strategies
+            </button>
+        </div>
 
-    <label>Years:</label>
-    <input asp-for="Years" /><br />
+        <p id="loading" class="hidden text-sm text-gray-400 text-center animate-pulse">
+            Running simulation...
+        </p>
 
-    <label>Expected Return (8%):</label>
-    <input asp-for="MeanAnnualReturn"/><br />
+    </form>
+</div>
 
-    <label>Volatility (0.15 = 15%):</label>
-    <input asp-for="Volatility"/><br />
-
-    <label>Simulation Count:</label>
-    <input asp-for="SimulationCount" /><br />
-
-    <label>Crash Probability (yearly):</label>
-    <input type="range" min="0.0" max="0.5" step="0.01"
-           asp-for="CrashProbabilityPerYear" 
-           oninput="this.nextElementSibling.textContent = this.value" />
-    <output>@Model.CrashProbabilityPerYear</output>
-    <br />
-
-    <label>Crash Impact (-0.4 = -40%):</label>
-    <input asp-for="CrashImpact" /><br />
-
-    <br />
-
-    <label>Simulation Model:</label>
-    <select asp-for="ModelType">
-        <option value="Real">Real Market (S&P 500)</option>
-        <option value="GBM">Theoretical (Normal Distribution)</option>
-    </select>
-    <br />
-
-    <button type="submit">Run Simulation</button>
-
-    <button type="submit" formaction="/Simulation/Compare">
-        Compare Strategies
-    </button>
-
-    <p id="loading" style="display:none;">Running simulation...</p>
-
+@section Scripts {
     <script>
         function showLoading() {
-            document.getElementById("loading").style.display = "block";
+            document.getElementById('loading').classList.remove('hidden');
+        }
+
+        const presets = {
+            conservative: { MeanAnnualReturn: 0.06, Volatility: 0.10, CrashProbabilityPerYear: 0.05 },
+            moderate:     { MeanAnnualReturn: 0.08, Volatility: 0.15, CrashProbabilityPerYear: 0.08 },
+            aggressive:   { MeanAnnualReturn: 0.12, Volatility: 0.22, CrashProbabilityPerYear: 0.12 }
+        };
+
+        function setPreset(name) {
+            const p = presets[name];
+            document.querySelector('[name="MeanAnnualReturn"]').value = p.MeanAnnualReturn;
+            document.querySelector('[name="Volatility"]').value = p.Volatility;
+            const slider = document.querySelector('[name="CrashProbabilityPerYear"]');
+            slider.value = p.CrashProbabilityPerYear;
+            document.getElementById('crashProbOut').textContent = p.CrashProbabilityPerYear.toFixed(2);
         }
     </script>
-
-</form>
+}

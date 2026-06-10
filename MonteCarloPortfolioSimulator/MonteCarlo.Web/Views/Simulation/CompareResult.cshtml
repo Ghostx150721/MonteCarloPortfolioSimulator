@@ -1,26 +1,106 @@
 ﻿@model MonteCarlo.Web.Models.ComparisonResult
+@{
+    ViewData["Title"] = "Strategy Comparison";
+}
 
-<h2>Strategy Comparison</h2>
+@functions {
+    string Fmt(double v)
+    {
+        if (v >= 1_000_000) return $"${v / 1_000_000:F2}M";
+        if (v >= 1_000) return $"${v / 1_000:F1}K";
+        return $"${v:F0}";
+    }
+    string DdFmt(double v) => v.ToString("P1");
+}
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>Metric</th>
-        <th>Strategy A</th>
-        <th>Strategy B</th>
-    </tr>
-    <tr>
-        <td>P10</td>
-        <td>@Model.StrategyA.P10.ToString("N0")</td>
-        <td>@Model.StrategyB.P10.ToString("N0")</td>
-    </tr>
-    <tr>
-        <td>P50</td>
-        <td>@Model.StrategyA.P50.ToString("N0")</td>
-        <td>@Model.StrategyB.P50.ToString("N0")</td>
-    </tr>
-    <tr>
-        <td>P90</td>
-        <td>@Model.StrategyA.P90.ToString("N0")</td>
-        <td>@Model.StrategyB.P90.ToString("N0")</td>
-    </tr>
-</table>
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-medium text-gray-900">Strategy comparison</h1>
+            <p class="text-xs text-gray-400 mt-0.5">Side-by-side outcome of both parameter sets</p>
+        </div>
+        <a asp-controller="Simulation" asp-action="Index"
+           class="text-sm text-gray-500 hover:text-gray-800 transition-colors">← New simulation</a>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mb-8">
+
+        <div class="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-4">
+            <p class="text-xs uppercase tracking-widest text-gray-400 font-medium">Strategy A</p>
+
+            <div class="flex flex-col gap-3">
+                <div>
+                    <p class="text-xs text-gray-400 mb-0.5">Worst case · P10</p>
+                    <p class="mono text-xl font-medium text-red-500">@Fmt(Model.StrategyA.P10)</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-0.5">Median · P50</p>
+                    <p class="mono text-xl font-medium text-gray-800">@Fmt(Model.StrategyA.P50)</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-0.5">Best case · P90</p>
+                    <p class="mono text-xl font-medium text-emerald-600">@Fmt(Model.StrategyA.P90)</p>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-3 flex flex-col gap-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Worst drawdown</span>
+                    <span class="mono text-red-500">
+                        @DdFmt(Model.StrategyA.MaxDrawdowns.Min())
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Median drawdown</span>
+                    <span class="mono text-red-400">
+                        @DdFmt(Model.StrategyA.MaxDrawdowns.OrderBy(x => x).ElementAt(Model.StrategyA.MaxDrawdowns.Count / 2))
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Average final value</span>
+                    <span class="mono text-gray-700">@Fmt(Model.StrategyA.Average)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-4">
+            <p class="text-xs uppercase tracking-widest text-gray-400 font-medium">Strategy B</p>
+
+            <div class="flex flex-col gap-3">
+                <div>
+                    <p class="text-xs text-gray-400 mb-0.5">Worst case · P10</p>
+                    <p class="mono text-xl font-medium text-red-500">@Fmt(Model.StrategyB.P10)</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-0.5">Median · P50</p>
+                    <p class="mono text-xl font-medium text-gray-800">@Fmt(Model.StrategyB.P50)</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-0.5">Best case · P90</p>
+                    <p class="mono text-xl font-medium text-emerald-600">@Fmt(Model.StrategyB.P90)</p>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-3 flex flex-col gap-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Worst drawdown</span>
+                    <span class="mono text-red-500">
+                        @DdFmt(Model.StrategyB.MaxDrawdowns.Min())
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Median drawdown</span>
+                    <span class="mono text-red-400">
+                        @DdFmt(Model.StrategyB.MaxDrawdowns.OrderBy(x => x).ElementAt(Model.StrategyB.MaxDrawdowns.Count / 2))
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Average final value</span>
+                    <span class="mono text-gray-700">@Fmt(Model.StrategyB.Average)</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

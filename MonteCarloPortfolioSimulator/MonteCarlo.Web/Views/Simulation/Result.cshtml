@@ -1,153 +1,207 @@
 ﻿@model MonteCarlo.Core.Models.SimulationResult
-@using System.Text.Json
-@inject Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper Html
+@{
+    ViewData["Title"] = "Results";
+}
 
-<h2>Results</h2>
+@functions {
+    string Fmt(double v)
+    {
+        if (v >= 1_000_000) return $"${v / 1_000_000:F2}M";
+        if (v >= 1_000) return $"${v / 1_000:F1}K";
+        return $"${v:F0}";
+    }
+}
 
-<div style="border:1px solid #ccc; padding:10px; margin-bottom:20px;">
-    <h3>Investment Summary</h3>
-    <p><strong>Worst Case (10%):</strong> @Model.P10.ToString("N0")</p>
-    <p><strong>Most Likely (Median):</strong> @Model.P50.ToString("N0")</p>
-    <p><strong>Best Case (90%):</strong> @Model.P90.ToString("N0")</p>
+<div class="flex h-[calc(100vh-57px)]">
+
+    {{!-- LEFT: re-run sidebar --}}
+    <aside class="w-64 shrink-0 border-r border-gray-200 bg-white overflow-y-auto p-5 flex flex-col gap-4">
+        <p class="text-xs font-medium uppercase tracking-widest text-gray-400">Adjust &amp; re-run</p>
+        <a asp-controller="Simulation" asp-action="Index"
+           class="w-full h-10 flex items-center justify-center rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+            ← Back to parameters
+        </a>
+        <p class="text-xs text-gray-400 mt-2">
+            Tweak your inputs and run again to compare different scenarios.
+        </p>
+    </aside>
+
+    {{!-- RIGHT: results --}}
+    <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+
+        <div>
+            <h1 class="text-lg font-medium text-gray-900">Simulation results</h1>
+            <p class="text-xs text-gray-400 mt-0.5">
+                @Model.FinalPortfolioValues.Count simulations &middot;
+                P10 / P50 / P90 percentile outcomes
+            </p>
+        </div>
+
+        {{!-- Metric cards --}}
+        <div class="grid grid-cols-3 gap-3">
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Worst case · P10</p>
+                <p class="mono text-2xl font-medium text-red-500">@Fmt(Model.P10)</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Median · P50</p>
+                <p class="mono text-2xl font-medium text-gray-800">@Fmt(Model.P50)</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Best case · P90</p>
+                <p class="mono text-2xl font-medium text-emerald-600">@Fmt(Model.P90)</p>
+            </div>
+        </div>
+
+        {{!-- Drawdown cards --}}
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Worst drawdown</p>
+                <p class="mono text-xl font-medium text-red-500">
+                    @Model.MaxDrawdowns.Min().ToString("P1")
+                </p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Typical drawdown · median</p>
+                <p class="mono text-xl font-medium text-red-400">
+                    @Model.MaxDrawdowns.OrderBy(x => x).ElementAt(Model.MaxDrawdowns.Count / 2).ToString("P1")
+                </p>
+            </div>
+        </div>
+
+        {{!-- Distribution chart --}}
+        <div class="bg-white border border-gray-100 rounded-xl p-5">
+            <p class="text-xs uppercase tracking-widest text-gray-400 mb-4">Final value distribution</p>
+            <canvas id="distChart" height="180"></canvas>
+        </div>
+
+        {{!-- Paths chart --}}
+        <div class="bg-white border border-gray-100 rounded-xl p-5">
+            <p class="text-xs uppercase tracking-widest text-gray-400 mb-4">Sample simulation paths</p>
+            <canvas id="pathChart" height="180"></canvas>
+        </div>
+
+    </div>
 </div>
 
-<canvas id="chart"></canvas>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script>
+        const finals = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FinalPortfolioValues));
+        const paths  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Paths));
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        const p10 = @Model.P10;
+        const p50 = @Model.P50;
+        const p90 = @Model.P90;
 
-<script>
-    const rawData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FinalPortfolioValues));
+        function fmtK(v) {
+            if (v >= 1e6) return '$' + (v/1e6).toFixed(2) + 'M';
+            if (v >= 1e3) return '$' + (v/1e3).toFixed(1) + 'K';
+            return '$' + Math.round(v);
+        }
 
-    const percentileValues = [
-        @Model.P10,
-        @Model.P50,
-        @Model.P90
-    ];
+        // --- Distribution chart ---
+        const binCount = 30;
+        const sorted = [...finals].sort((a,b) => a-b);
+        const minV = sorted[0], maxV = sorted[sorted.length-1];
+        const binSize = (maxV - minV) / binCount;
 
-    const binCount = 30;
+        const bins = new Array(binCount).fill(0);
+        finals.forEach(v => {
+            let i = Math.floor((v - minV) / binSize);
+            if (i >= binCount) i = binCount - 1;
+            bins[i]++;
+        });
 
-    const min = Math.min(...rawData);
-    const max = Math.max(...rawData);
-    const binSize = (max - min) / binCount;
+        const toIdx = v => Math.min(binCount-1, Math.floor((v - minV) / binSize));
+        const p10i = toIdx(p10), p50i = toIdx(p50), p90i = toIdx(p90);
 
-    const bins = new Array(binCount).fill(0);
+        const labels = bins.map((_, i) => fmtK(minV + i * binSize));
 
-    rawData.forEach(value => {
-        let index = Math.floor((value - min) / binSize);
-        if (index >= binCount) index = binCount - 1;
-        bins[index]++;
-    });
-
-    const labels = bins.map((_, i) => {
-        const start = Math.round(min + i * binSize);
-        const end = Math.round(start + binSize);
-        return `${start} - ${end}`;
-    });
-
-    // ✅ Convert percentile values → bin index
-    const percentileIndexes = percentileValues.map(v => {
-        let index = Math.floor((v - min) / binSize);
-        if (index >= binCount) index = binCount - 1;
-        return index;
-    });
-
-    const ctx = document.getElementById('chart');
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Distribution',
-                data: bins
-            }]
-        },
-        options: {
-            scales: {
-                x: {
-                    ticks: {
-                        maxRotation: 90,
-                        minRotation: 45
-                    }
-                }
-            }
-        },
-
-        // ✅ REGISTER PLUGIN HERE
-        plugins: [{
-            id: 'percentileLines',
-            afterDraw: (chart) => {
-                const { ctx, scales: { x, y } } = chart;
-
-                percentileIndexes.forEach((index, i) => {
-                    const xPos = x.getPixelForValue(index);
-
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.moveTo(xPos, y.top);
-                    ctx.lineTo(xPos, y.bottom);
-                    ctx.lineWidth = 2;
-
-                    // Different colors for each percentile
-                    const colors = ['red', 'green', 'orange'];
-                    ctx.strokeStyle = colors[i];
-
-                    ctx.stroke();
-
-                    // Optional label
-                    ctx.fillStyle = colors[i];
-                    ctx.fillText(['P10', 'P50', 'P90'][i], xPos + 5, y.top + 15);
-
-                    ctx.restore();
-                });
-            }
-        }]
-    });
-</script>
-
-<h3>Sample Simulation Paths</h3>
-<canvas id="pathChart"></canvas>
-
-<script>
-    const paths = @Html.Raw(JsonSerializer.Serialize(Model.Paths));
-
-    // take first 20 paths
-    const samplePaths = paths.slice(0, 20);
-
-    const datasets = samplePaths.map((path, i) => ({
-        label: `Sim ${i + 1}`,
-        data: path,
-        borderWidth: 1,
-        fill: false,
-        tension: 0.1
-    }));
-
-    new Chart(document.getElementById('pathChart'), {
-        type: 'line',
-        data: {
-            labels: [...Array(samplePaths[0].length).keys()],
-            datasets: datasets
-        },
-        options: {
-            plugins: {
-                legend: {
-                    display: false // cleaner look
-                }
+        new Chart(document.getElementById('distChart'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Simulations',
+                    data: bins,
+                    backgroundColor: bins.map((_, i) => {
+                        if (i === p10i) return '#EF4444';
+                        if (i === p50i) return '#6B7280';
+                        if (i === p90i) return '#10B981';
+                        return 'rgba(59,130,246,0.25)';
+                    }),
+                    borderWidth: 0,
+                    borderRadius: 3
+                }]
             },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Months'
+            plugins: [{
+                id: 'pLines',
+                afterDraw(chart) {
+                    const { ctx, scales: { x, y } } = chart;
+                    [[p10i,'#EF4444','P10'],[p50i,'#6B7280','P50'],[p90i,'#10B981','P90']].forEach(([idx,color,lbl]) => {
+                        const xp = x.getPixelForValue(idx);
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(xp, y.top);
+                        ctx.lineTo(xp, y.bottom);
+                        ctx.lineWidth = 1.5;
+                        ctx.setLineDash([4,3]);
+                        ctx.strokeStyle = color;
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        ctx.font = '11px JetBrains Mono, monospace';
+                        ctx.fillStyle = color;
+                        ctx.fillText(lbl, xp + 4, y.top + 14);
+                        ctx.restore();
+                    });
+                }
+            }],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { maxTicksLimit: 6, font: { size: 10 }, maxRotation: 45 }, grid: { color: '#F3F4F6' } },
+                    y: { ticks: { font: { size: 10 }, callback: v => v }, grid: { color: '#F3F4F6' } }
+                }
+            }
+        });
+
+        // --- Paths chart ---
+        const sample = paths.slice(0, 20);
+        const monthLabels = Array.from({ length: sample[0].length }, (_, i) => i + 1);
+
+        new Chart(document.getElementById('pathChart'), {
+            type: 'line',
+            data: {
+                labels: monthLabels,
+                datasets: sample.map((path, i) => ({
+                    data: path,
+                    borderWidth: 1,
+                    borderColor: i === 0 ? 'rgba(59,130,246,0.6)' : 'rgba(59,130,246,0.15)',
+                    pointRadius: 0,
+                    fill: false,
+                    tension: 0.2
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        ticks: { maxTicksLimit: 10, font: { size: 10 } },
+                        grid: { color: '#F3F4F6' },
+                        title: { display: true, text: 'Month', font: { size: 11 }, color: '#9CA3AF' }
+                    },
+                    y: {
+                        ticks: { font: { size: 10 }, callback: v => fmtK(v) },
+                        grid: { color: '#F3F4F6' }
                     }
                 },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Portfolio Value'
-                    }
-                }
+                animation: { duration: 600 }
             }
-        }
-    });
-</script>
+        });
+    </script>
+}
