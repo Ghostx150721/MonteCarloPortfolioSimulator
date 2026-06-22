@@ -14,71 +14,74 @@
 
 <div class="flex h-[calc(100vh-57px)]">
 
-    {{!-- LEFT: re-run sidebar --}}
-    <aside class="w-64 shrink-0 border-r border-gray-200 bg-white overflow-y-auto p-5 flex flex-col gap-4">
-        <p class="text-xs font-medium uppercase tracking-widest text-gray-400">Adjust &amp; re-run</p>
+    @* LEFT: re-run sidebar *@
+    <aside class="w-64 shrink-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-y-auto p-5 flex flex-col gap-4">
+        <p class="text-xs font-medium uppercase tracking-widest text-gray-400 dark:text-gray-500">Adjust &amp; re-run</p>
         <a asp-controller="Simulation" asp-action="Index"
-           class="w-full h-10 flex items-center justify-center rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+           class="w-full h-10 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
             ← Back to parameters
         </a>
-        <p class="text-xs text-gray-400 mt-2">
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
             Tweak your inputs and run again to compare different scenarios.
         </p>
     </aside>
 
-    {{!-- RIGHT: results --}}
+    @* RIGHT: results *@
     <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
 
         <div>
-            <h1 class="text-lg font-medium text-gray-900">Simulation results</h1>
-            <p class="text-xs text-gray-400 mt-0.5">
+            <h1 class="text-lg font-medium text-gray-900 dark:text-gray-100">Simulation results</h1>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                 @Model.FinalPortfolioValues.Count simulations &middot;
                 P10 / P50 / P90 percentile outcomes
             </p>
         </div>
 
-        {{!-- Metric cards --}}
+        @* Metric cards *@
         <div class="grid grid-cols-3 gap-3">
-            <div class="bg-gray-50 rounded-xl p-4">
-                <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Worst case · P10</p>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                <p class="text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Worst case · P10</p>
                 <p class="mono text-2xl font-medium text-red-500">@Fmt(Model.P10)</p>
             </div>
-            <div class="bg-gray-50 rounded-xl p-4">
-                <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Median · P50</p>
-                <p class="mono text-2xl font-medium text-gray-800">@Fmt(Model.P50)</p>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                <p class="text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Median · P50</p>
+                <p class="mono text-2xl font-medium text-gray-800 dark:text-gray-100">@Fmt(Model.P50)</p>
             </div>
-            <div class="bg-gray-50 rounded-xl p-4">
-                <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Best case · P90</p>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                <p class="text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Best case · P90</p>
                 <p class="mono text-2xl font-medium text-emerald-600">@Fmt(Model.P90)</p>
             </div>
         </div>
 
-        {{!-- Drawdown cards --}}
+        @* Drawdown cards *@
         <div class="grid grid-cols-2 gap-3">
-            <div class="bg-gray-50 rounded-xl p-4">
-                <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Worst drawdown</p>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                <p class="text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Worst drawdown</p>
                 <p class="mono text-xl font-medium text-red-500">
                     @Model.MaxDrawdowns.Min().ToString("P1")
                 </p>
             </div>
-            <div class="bg-gray-50 rounded-xl p-4">
-                <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Typical drawdown · median</p>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                <p class="text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Typical drawdown · median</p>
                 <p class="mono text-xl font-medium text-red-400">
                     @Model.MaxDrawdowns.OrderBy(x => x).ElementAt(Model.MaxDrawdowns.Count / 2).ToString("P1")
                 </p>
             </div>
         </div>
 
-        {{!-- Distribution chart --}}
-        <div class="bg-white border border-gray-100 rounded-xl p-5">
-            <p class="text-xs uppercase tracking-widest text-gray-400 mb-4">Final value distribution</p>
-            <canvas id="distChart" height="180"></canvas>
+        <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5">
+            <p class="text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">Final value distribution</p>
+            <div class="relative h-48">
+                <canvas id="distChart"></canvas>
+            </div>
         </div>
 
-        {{!-- Paths chart --}}
-        <div class="bg-white border border-gray-100 rounded-xl p-5">
-            <p class="text-xs uppercase tracking-widest text-gray-400 mb-4">Sample simulation paths</p>
-            <canvas id="pathChart" height="180"></canvas>
+        @* Paths chart *@
+        <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5">
+            <p class="text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">Sample simulation paths</p>
+            <div class="relative h-48">
+                <canvas id="pathChart"></canvas>
+            </div>
         </div>
 
     </div>

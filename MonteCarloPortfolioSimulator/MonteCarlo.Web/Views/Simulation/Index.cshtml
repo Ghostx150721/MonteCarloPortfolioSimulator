@@ -6,23 +6,23 @@
 <div class="max-w-lg mx-auto px-6 py-12">
 
     <div class="mb-8">
-        <h1 class="text-xl font-medium text-gray-900">Portfolio simulator</h1>
-        <p class="text-sm text-gray-400 mt-1">
+        <h1 class="text-xl font-medium text-gray-900 dark:text-gray-100">Portfolio simulator</h1>
+        <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">
             Monte Carlo projection using GBM or real S&amp;P 500 returns
         </p>
     </div>
 
     <div class="flex gap-2 mb-6">
         <button type="button" onclick="setPreset('conservative')"
-                class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
             Conservative
         </button>
         <button type="button" onclick="setPreset('aggressive')"
-                class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
             Aggressive
         </button>
         <button type="button" onclick="setPreset('moderate')"
-                class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
             Moderate
         </button>
     </div>
@@ -31,82 +31,82 @@
 
         <div class="grid grid-cols-2 gap-4">
             <div class="flex flex-col gap-1.5">
-                <label class="text-xs text-gray-500 uppercase tracking-widest">Initial investment</label>
+                <label class="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-widest">Initial investment</label>
                 <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 text-sm">$</span>
                     <input asp-for="InitialInvestment" type="number"
-                           class="mono w-full h-10 pl-7 pr-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+                           class="mono w-full h-10 pl-7 pr-3 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600" />
                 </div>
             </div>
             <div class="flex flex-col gap-1.5">
-                <label class="text-xs text-gray-500 uppercase tracking-widest">Monthly contribution</label>
+                <label class="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-widest">Monthly contribution</label>
                 <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 text-sm">$</span>
                     <input asp-for="MonthlyContribution" type="number"
-                           class="mono w-full h-10 pl-7 pr-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+                           class="mono w-full h-10 pl-7 pr-3 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600" />
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
             <div class="flex flex-col gap-1.5">
-                <label class="text-xs text-gray-500 uppercase tracking-widest">Years</label>
+                <label class="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-widest">Years</label>
                 <input asp-for="Years" type="number"
-                       class="mono w-full h-10 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+                       class="mono w-full h-10 px-3 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600" />
             </div>
             <div class="flex flex-col gap-1.5">
-                <label class="text-xs text-gray-500 uppercase tracking-widest">Simulations</label>
+                <label class="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-widest">Simulations</label>
                 <input asp-for="SimulationCount" type="number"
-                       class="mono w-full h-10 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
+                       class="mono w-full h-10 px-3 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600" />
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
             <div class="flex flex-col gap-1.5">
-                <label class="text-xs text-gray-500 uppercase tracking-widest">Mean annual return</label>
+                <label class="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-widest">Mean annual return</label>
                 <div class="relative">
                     <input asp-for="MeanAnnualReturn" type="number" step="0.01"
-                           class="mono w-full h-10 px-3 pr-7 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                           class="mono w-full h-10 px-3 pr-7 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600" />
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 text-sm">%</span>
                 </div>
             </div>
             <div class="flex flex-col gap-1.5">
-                <label class="text-xs text-gray-500 uppercase tracking-widest">Volatility</label>
+                <label class="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-widest">Volatility</label>
                 <div class="relative">
                     <input asp-for="Volatility" type="number" step="0.01"
-                           class="mono w-full h-10 px-3 pr-7 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                           class="mono w-full h-10 px-3 pr-7 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600" />
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 text-sm">%</span>
                 </div>
             </div>
         </div>
 
         <div class="flex flex-col gap-2">
             <div class="flex justify-between items-center">
-                <label class="text-xs text-gray-500 uppercase tracking-widest">Crash probability / year</label>
-                <span class="mono text-sm text-gray-700" id="crashProbOut">@Model.CrashProbabilityPerYear</span>
+                <label class="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-widest">Crash probability / year</label>
+                <span class="mono text-sm text-gray-700 dark:text-gray-300" id="crashProbOut">@Model.CrashProbabilityPerYear</span>
             </div>
             <input asp-for="CrashProbabilityPerYear" type="range" min="0" max="0.5" step="0.01"
                    class="w-full"
                    oninput="document.getElementById('crashProbOut').textContent = parseFloat(this.value).toFixed(2)" />
-            <div class="flex justify-between text-xs text-gray-300">
+            <div class="flex justify-between text-xs text-gray-300 dark:text-gray-600">
                 <span>0%</span><span>50%</span>
             </div>
         </div>
 
         <div class="flex flex-col gap-1.5">
-            <label class="text-xs text-gray-500 uppercase tracking-widest">Crash impact</label>
+            <label class="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-widest">Crash impact</label>
             <div class="relative">
                 <input asp-for="CrashImpact" type="number" step="0.01"
-                       class="mono w-full h-10 px-3 pr-7 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400" />
-                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                       class="mono w-full h-10 px-3 pr-7 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 text-sm">%</span>
             </div>
-            <p class="text-xs text-gray-400">Enter a negative value, e.g. -0.40 for a 40% crash</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500">Enter a negative value, e.g. -0.40 for a 40% crash</p>
         </div>
 
         <div class="flex flex-col gap-1.5">
-            <label class="text-xs text-gray-500 uppercase tracking-widest">Model</label>
+            <label class="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-widest">Model</label>
             <select asp-for="ModelType"
-                    class="mono w-full h-10 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-gray-400 appearance-none">
+                    class="mono w-full h-10 px-3 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600 appearance-none">
                 <option value="Real">Real market (S&amp;P 500 historical)</option>
                 <option value="GBM">Theoretical (GBM / normal distribution)</option>
             </select>
@@ -114,16 +114,16 @@
 
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                    class="flex-1 h-11 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors">
+                    class="flex-1 h-11 rounded-lg bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-medium hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors">
                 Run simulation
             </button>
             <button type="submit" formaction="/Simulation/Compare"
-                    class="flex-1 h-11 rounded-lg border border-gray-200 bg-white text-sm text-gray-600 font-medium hover:bg-gray-50 transition-colors">
+                    class="flex-1 h-11 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 Compare strategies
             </button>
         </div>
 
-        <p id="loading" class="hidden text-sm text-gray-400 text-center animate-pulse">
+        <p id="loading" class="hidden text-sm text-gray-400 dark:text-gray-500 text-center animate-pulse">
             Running simulation...
         </p>
 

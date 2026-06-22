@@ -32,7 +32,8 @@ namespace MonteCarlo.Web.Controllers
                 Years = input.Years,
                 SimulationCount = input.SimulationCount,
                 CrashProbabilityPerYear = input.CrashProbabilityPerYear,
-                CrashImpact = input.CrashImpact
+                CrashImpact = input.CrashImpact,
+                ModelType = input.ModelType
             };
 
             var result = await _service.RunSimulation(parameters);
@@ -41,10 +42,8 @@ namespace MonteCarlo.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Compare(SimulationInputModel input)
+        public async Task<IActionResult> Compare(SimulationInputModel input)
         {
-            var simulator = new MonteCarloSimulator();
-
             // Strategy A
             var paramsA = new SimulationParameters
             {
@@ -55,8 +54,6 @@ namespace MonteCarlo.Web.Controllers
                 Volatility = input.Volatility,
                 SimulationCount = input.SimulationCount,
                 ModelType = input.ModelType,
-
-                // ✅ ADD THESE
                 CrashProbabilityPerYear = input.CrashProbabilityPerYear,
                 CrashImpact = input.CrashImpact
             };
@@ -71,16 +68,19 @@ namespace MonteCarlo.Web.Controllers
                 Volatility = input.Volatility,
                 SimulationCount = input.SimulationCount,
                 ModelType = input.ModelType,
-
-                // ✅ ADD THESE
                 CrashProbabilityPerYear = input.CrashProbabilityPerYear,
                 CrashImpact = input.CrashImpact
             };
 
+            var taskA = _service.RunSimulation(paramsA);
+            var taskB = _service.RunSimulation(paramsB);
+
+            await Task.WhenAll(taskA, taskB);
+
             var result = new ComparisonResult
             {
-                StrategyA = simulator.Run(paramsA),
-                StrategyB = simulator.Run(paramsB)
+                StrategyA = await taskA,
+                StrategyB = await taskB
             };
 
             return View("CompareResult", result);
